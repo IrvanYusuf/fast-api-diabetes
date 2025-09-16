@@ -7,7 +7,6 @@ class User(BaseModel):
 
 
 class Diabetes(BaseModel):
-    name: str
     gender: int
     age: float
     hypertension: int
