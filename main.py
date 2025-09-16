@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from db import init_db
 from routers import user_route, diabetes_route
 from contextlib import asynccontextmanager
+from mangum import Mangum
 
 
 @asynccontextmanager
@@ -25,3 +26,6 @@ async def index():
 
 app.include_router(user_route.router)
 app.include_router(diabetes_route.router)
+
+
+handler = Mangum(app)
