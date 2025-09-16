@@ -11,8 +11,14 @@ MONGO_URI = os.getenv("MONGO_URI")
 
 async def init_db():
     try:
+        print("Mencoba menghubungkan ke MongoDB...")
         client = AsyncIOMotorClient(MONGO_URI)
-        db = client["ml_diabetes_predict"]  # jangan pakai get_default_database
+        # Menambahkan perintah 'ping' untuk menguji koneksi
+        await client.admin.command('ping')
+        print("Koneksi ke MongoDB berhasil!")
+        db = client["ml_diabetes_predict"]
         await init_beanie(database=db, document_models=[models.User, models.Diabetes])
+        print("Beanie berhasil diinisialisasi.")
     except Exception as e:
-        raise e
+        print(f"Error saat inisialisasi DB: {e}")
+        raise
