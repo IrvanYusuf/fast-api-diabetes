@@ -2,10 +2,13 @@ from fastapi import APIRouter, Depends, status
 from schema.schema import Diabetes
 import joblib
 import pandas as pd
+import requests
 from ..lib.endpoints import ENDPOINTS
 
 
 router = APIRouter(prefix="/predict/diabetes", tags=['Diabetes'])
+
+API_MODEL_URL = "https://irvan222-diabetes-prediction.hf.space/predict"
 
 
 @router.post(ENDPOINTS['predict_diabetes']['root'])
@@ -23,16 +26,17 @@ def predict(data: Diabetes):
         }
     ])
 
-    model = joblib.load("ml_model/diabetes_model.joblib")
+    response = requests.post(API_MODEL_URL, json=input_df)
+    response.raise_for_status()
 
     print("on processs")
 
-    predict = model.predict(input_df)[0]
-    proba = model.predict_proba(input_df)[0][1]
+    result = response.json()
 
+    print(result)
     return {
         "message": "success",
         "data": data,
-        "prediction": "Diabetes" if int(predict) == 1 else "No Diabetes",
-        "probability_diabetes": f"{round(proba*100, 2)}%"
+        "prediction": result['prediction_result'],
+        "probability_diabetes": f"{round(result['prediction_probabilities'][1]*100, 2)}%"
     }
