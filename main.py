@@ -6,8 +6,11 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
-    yield
+    try:
+        await init_db()
+        yield
+    except Exception as e:
+        raise e
 
 
 app = FastAPI(lifespan=lifespan)
