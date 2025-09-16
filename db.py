@@ -1,21 +1,13 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from logger import logger
+from motor.motor_asyncio import AsyncIOMotorClient
+from beanie import init_beanie
+import models
+import os
 
-DATABASE_URL = "mysql+pymysql://root:@localhost:3306/db_fast_api"
-
-
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autoflush=False, bind=engine)
-
-Base = declarative_base()
+MONGO_URI = os.getenv(
+    "MONGO_URI", "mongodb+srv://irvanyusufcahyadi_db_user:yUvChhrWcens63SI@cluster0.jtgihum.mongodb.net/ml_diabetes_predict?retryWrites=true&w=majority&appName=Cluster0")
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-        logger.info("Database successfully connecting")
-    finally:
-        db.close()
+async def init_db():
+    client = AsyncIOMotorClient(MONGO_URI)
+    db = client.get_default_database()
+    await init_beanie(database=db, document_models=[models.User, models.Diabetes])
