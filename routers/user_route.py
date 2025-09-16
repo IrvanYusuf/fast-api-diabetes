@@ -1,38 +1,37 @@
 # routers/users.py
 
 from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.orm import Session
-from db import get_db
 from schema.schema import User
-from controllers import user_controller
+from controllers.user_controller import UserController
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
+user_controller = UserController()
+
 
 @router.get("/")
-def get_users(
-    db: Session = Depends(get_db),
+async def get_users(
     limit: int = Query(5, ge=1),
     offset: int = Query(0, ge=0)
 ):
-    return user_controller.get_users(limit, offset, db)
+    return await user_controller.get_users(limit, offset)
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_user(item: User, db: Session = Depends(get_db)):
-    return user_controller.create_user(item, db)
+async def create_user(item: User):
+    return await user_controller.create_user(item)
 
 
 @router.get("/{user_id}")
-def get_user(user_id: str, db: Session = Depends(get_db)):
-    return user_controller.get_user(user_id=user_id, db=db)
+async def get_user(user_id: str):
+    return await user_controller.get_user(user_id=user_id)
 
 
 @router.put("/{user_id}")
-def update_user(user_id: str, item: User, db: Session = Depends(get_db)):
-    return user_controller.update_user(user_id, item, db)
+async def update_user(user_id: str, item: User):
+    return await user_controller.update_user(user_id, item)
 
 
 @router.delete("/{user_id}")
-def delete_user(user_id: str, db: Session = Depends(get_db)):
-    return user_controller.delete_user(user_id, db)
+async def delete_user(user_id: str):
+    return await user_controller.delete_user(user_id)

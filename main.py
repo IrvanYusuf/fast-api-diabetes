@@ -1,13 +1,14 @@
 from fastapi import FastAPI
-import models
-from db import engine
+from db import init_db
 from routers import user_route, diabetes_route
 
 
-models.Base.metadata.create_all(engine)
-
-
 app = FastAPI()
+
+
+@app.on_event("startup")
+async def start_db():
+    await init_db()
 
 
 @app.get("/")

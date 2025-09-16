@@ -1,12 +1,21 @@
-from sqlalchemy import Column, String, Integer
-from db import Base
-import uuid
+from typing import Optional
+from beanie import Document
 
 
-class User(Base):
-    __tablename__ = "users"
+class User(Document):
+    name: str
+    age: int
 
-    id = Column(String(36), primary_key=True,
-                default=lambda: str(uuid.uuid4()))
-    name = Column(String(255))
-    age = Column(Integer)
+    class Settings:
+        name = "users"
+
+
+class Diabetes(Document):
+    glucose: int
+    blood_pressure: int
+    insulin: int
+    bmi: float
+    prediction: Optional[str] = None
+
+    class Settings:
+        name = "diabetes"

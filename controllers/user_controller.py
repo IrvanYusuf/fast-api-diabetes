@@ -1,50 +1,49 @@
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import update
-import models
-from schema.schema import User
+from models import User
+from schema.schema import User as UserSchema
+from services.user_service import UserService
 
 
-def get_users(limit: int, offset: int, db: Session):
-    users = db.query(models.User).offset(offset).limit(limit).all()
-    total = db.query(models.User).count()
-    return {"message": "success", "pagination": {"total": total, "limit": limit}, "data": users}
+class UserController():
+    def __init__(self, userService: UserService = UserService()):
+        self.userService = userService
 
+    # Get all users with pagination
 
-def create_user(item: User, db: Session):
-    user = models.User(name=item.name, age=item.age)
-    db.add(user)
-    db.commit()
-    return {"message": "success", "data": item}
+    async def get_users(self, limit: int = 10, offset: int = 0):
+        users, total = await self.userService.get_users(limit, offset)
+        return {
+            "message": "success",
+            "pagination": {"total": total, "limit": limit, "offset": offset},
+            "data": users,
+        }
 
+    # Create user
 
-def get_user(user_id: str, db: Session):
-    user = db.get(models.User, user_id)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    return {"message": "success", "data": user}
+    async def create_user(self, item: UserSchema):
+        await self.get_user_by_name(item.name)
+        user = User(name=item.name, age=item.age)
+        await self.userService.create(user)
+        return {"message": "success", "data": user}
 
+    # Get single user
 
-def update_user(user_id: str, item: User, db: Session):
-    query = (
-        update(models.User)
-        .where(models.User.id == user_id)
-        .values(name=item.name, age=item.age)
-    )
-    result = db.execute(query)
-    db.commit()
+    async def get_user(self, user_id: str):
+        user = await self.userService.get_user(user_id)
+        return {"message": "success", "data": user}
 
-    if result.rowcount == 0:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"message": "success update user", "data": item}
+    # Get user by name
 
+    async def get_user_by_name(self, name: str):
+        user = await self.userService.get_user_by_name(name)
+        return {"message": "success", "data": user}
 
-def delete_user(user_id: str, db: Session):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    db.delete(user)
-    db.commit()
-    return {"message": "success delete user", "data": []}
+    # Update user
+
+    async def update_user(self, user_id: str, item: UserSchema):
+        user = await self.userService.update(user_id, item)
+        return {"message": "success update user", "data": user}
+
+    # Delete user
+    async def delete_user(self, user_id: str):
+        await self.userService.delete(user_id)
+        return {"message": "success delete user", "data": []}
