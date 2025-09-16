@@ -2,6 +2,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 import models
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 MONGO_URI = os.getenv(
     "MONGO_URI", "mongodb+srv://irvanyusufcahyadi_db_user:yUvChhrWcens63SI@cluster0.jtgihum.mongodb.net/ml_diabetes_predict?retryWrites=true&w=majority&appName=Cluster0")

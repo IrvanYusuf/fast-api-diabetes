@@ -1,14 +1,16 @@
 from fastapi import FastAPI
 from db import init_db
 from routers import user_route, diabetes_route
+from contextlib import asynccontextmanager
 
 
-app = FastAPI()
-
-
-@app.on_event("startup")
-async def start_db():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     await init_db()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")
